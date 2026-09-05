@@ -47,7 +47,15 @@ Backend/build
 
 Frontend/dist
 Frontend/build
-
+Backend/.vs/
+Backend/Backend/bin/
+Backend/Backend/obj/
+Backend/Domain/bin/
+Backend/Domain/obj/
+Backend/Application/bin/
+Backend/Application/obj/
+Backend/Infrastructure/bin/
+Backend/Infrastructure/obj/
 *.tmp
 *.temp
 *.bak

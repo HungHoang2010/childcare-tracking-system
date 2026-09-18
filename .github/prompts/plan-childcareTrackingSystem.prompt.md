@@ -73,6 +73,140 @@ Trách nhiệm:
 
 ### 3. Thiết kế database và Entity Framework Core
 
+#### 3.1. Các bảng hiện có
+
+Database hiện tại đã có các bảng nền tảng sau:
+
+| Bảng                     | Công dụng                                                                                            | Quan hệ chính                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `administrative_regions` | Lưu vùng hoặc khu vực hành chính cấp cao hơn để phục vụ tra cứu địa chỉ.                             | Có thể liên kết với `provinces`.                                                                                 |
+| `provinces`              | Lưu tỉnh hoặc thành phố trực thuộc trung ương.                                                       | Thuộc `administrative_regions`; có nhiều `wards`.                                                                |
+| `wards`                  | Lưu phường, xã hoặc thị trấn.                                                                        | Thuộc `provinces`; được `schools` sử dụng để lưu địa chỉ.                                                        |
+| `administrative_units`   | Lưu danh mục hoặc loại đơn vị hành chính dùng chung nếu hệ thống cần phân loại các cấp hành chính.   | Có thể được tham chiếu bởi các bảng địa chỉ; cần xác định rõ vai trò để tránh trùng nghĩa với các bảng địa giới. |
+| `schools`                | Lưu thông tin từng trường học trong hệ thống multi-tenant. Mỗi trường là một tenant riêng.           | Liên kết với địa chỉ, người dùng và toàn bộ dữ liệu nghiệp vụ của trường.                                        |
+| `roles`                  | Lưu các vai trò hệ thống, ví dụ `PlatformAdmin`, `SchoolAdmin`, `SchoolStaff`, `Parent` và `Driver`. | Liên kết với `permissions` qua `rolespermission` và với người dùng qua bảng liên kết tài khoản-trường.           |
+| `permissions`            | Lưu các quyền nhỏ trong hệ thống, ví dụ xem học sinh, cập nhật điểm danh hoặc quản lý chuyến xe.     | Liên kết với `roles` qua `rolespermission`.                                                                      |
+| `rolespermission`        | Bảng trung gian nhiều-nhiều giữa vai trò và quyền.                                                   | Nên chuẩn hóa tên thành `role_permissions` nếu dự án dùng snake_case.                                            |
+
+Các ràng buộc nên có cho nhóm bảng hiện tại:
+
+- `schools.code` là duy nhất.
+- `schools.slug` là duy nhất và dùng cho URL của từng trường.
+- `schools.ward_id` phải tham chiếu tới `wards.id`.
+- `wards.province_id` phải tham chiếu tới `provinces.id`.
+- `rolespermission` có khóa chính kết hợp gồm `role_id` và `permission_id`.
+- Không xóa cứng trường, vai trò hoặc quyền đang được sử dụng; dùng trạng thái `is_active` khi phù hợp.
+
+#### 3.2. Các bảng tài khoản và phân quyền cần bổ sung
+
+Để phục vụ nhiều trường, cần bổ sung các bảng sau:
+
+| Bảng                                        | Công dụng                                                                                                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `users` hoặc các bảng ASP.NET Core Identity | Lưu thông tin xác thực như tên đăng nhập, email, mật khẩu đã hash, trạng thái khóa và thời điểm đăng nhập. Không lưu dữ liệu hồ sơ cá nhân chi tiết ở đây. |
+| `user_profiles`                             | Lưu hồ sơ cá nhân dùng chung cho mọi loại người dùng như họ tên, số định danh, ngày sinh, giới tính, số điện thoại, địa chỉ và ảnh đại diện.               |
+| `user_schools`                              | Liên kết người dùng với trường. Đây là bảng tenant membership, giúp một người có thể thuộc một hoặc nhiều trường.                                          |
+| `user_roles` hoặc bảng Identity tương ứng   | Liên kết người dùng với vai trò. Nếu vai trò khác nhau theo từng trường, nên lưu `role_id` trong `user_schools` hoặc tạo membership role riêng.            |
+| `parent_profiles`                           | Lưu thông tin nghiệp vụ của phụ huynh sau khi tài khoản được tạo.                                                                                          |
+| `driver_profiles`                           | Lưu thông tin tài xế nếu tài xế cần đăng nhập hoặc được quản lý riêng.                                                                                     |
+
+`user_profiles` có quan hệ một-một với `users` và nên có tối thiểu:
+
+```text
+id
+user_id
+resident_number
+full_name
+date_of_birth
+gender
+phone
+ward_id
+address_detail
+image_url
+created_at
+updated_at
+```
+
+`resident_number` là dữ liệu nhạy cảm, phải giới hạn quyền truy cập và không hiển thị đầy đủ cho phụ huynh hoặc nhân viên thông thường. Không lưu `resident_number`, `date_of_birth` hoặc `full_name` lặp lại trong `parent_profiles` và `driver_profiles`.
+
+Các bảng profile theo vai trò chỉ lưu dữ liệu đặc thù:
+
+- `parent_profiles`: nghề nghiệp, người liên hệ khẩn cấp hoặc thông tin liên lạc bổ sung.
+- `driver_profiles`: số giấy phép lái xe, loại giấy phép, ngày hết hạn và trạng thái làm việc.
+
+`user_schools` nên có tối thiểu:
+
+```text
+id
+user_id
+school_id
+role_id
+is_active
+created_at
+updated_at
+```
+
+Mọi truy vấn nghiệp vụ phải xác định `school_id` từ membership hoặc JWT, không tin `school_id` tùy ý do Frontend gửi lên.
+
+#### 3.3. Các bảng nghiệp vụ cần bổ sung
+
+| Nhóm             | Bảng                            | Công dụng                                                                                                    |
+| ---------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Năm học và lớp   | `academic_years`                | Lưu năm học, ví dụ `2026-2027`, và trạng thái đang hoạt động.                                                |
+| Năm học và lớp   | `classes`                       | Lưu lớp thuộc trường và năm học, ví dụ lớp `5A1`.                                                            |
+| Học sinh         | `students`                      | Lưu mã học sinh, họ tên, ngày sinh, giới tính, lớp, trường và trạng thái hoạt động.                          |
+| Học sinh         | `parent_students`               | Liên kết phụ huynh với học sinh; cho phép một phụ huynh có nhiều con và một học sinh có nhiều người giám hộ. |
+| Xe đưa đón       | `vehicles`                      | Lưu xe thuộc trường, biển số, sức chứa, mã xe và trạng thái hoạt động.                                       |
+| Xe đưa đón       | `drivers`                       | Lưu tài xế, số điện thoại, giấy phép và trạng thái làm việc.                                                 |
+| Tuyến xe         | `routes`                        | Lưu tuyến xe thuộc trường.                                                                                   |
+| Tuyến xe         | `route_stops`                   | Lưu các điểm đón/trả, thứ tự và thời gian dự kiến trên một tuyến.                                            |
+| Tuyến xe         | `student_transport_assignments` | Gán học sinh vào tuyến và điểm đón cụ thể.                                                                   |
+| Chuyến xe        | `trips`                         | Lưu chuyến xe theo ngày, tuyến, xe, loại chuyến sáng/chiều và trạng thái.                                    |
+| Chuyến xe        | `trip_students`                 | Xác định học sinh thực tế thuộc từng chuyến xe trong ngày.                                                   |
+| Điểm danh xe     | `vehicle_attendances`           | Lưu học sinh đã lên xe, xuống xe, vắng trên xe và thời điểm cập nhật.                                        |
+| Điểm danh trường | `school_attendances`            | Lưu trạng thái có mặt, vắng, đi trễ hoặc có phép tại trường.                                                 |
+| Lịch sử          | `audit_logs`                    | Lưu ai đã thay đổi dữ liệu nào, giá trị cũ, giá trị mới và thời điểm thay đổi.                               |
+| Thông báo        | `notifications`                 | Lưu thông báo cho phụ huynh hoặc nhân viên khi xe trễ, học sinh vắng hoặc có sự kiện quan trọng.             |
+
+Các bảng nghiệp vụ thuộc một trường phải có `school_id`, bao gồm `classes`, `students`, `vehicles`, `drivers`, `routes`, `trips`, `vehicle_attendances` và `school_attendances`.
+
+#### 3.4. Quan hệ database chính
+
+```text
+administrative_regions
+	└── provinces
+				└── wards
+							└── schools
+
+schools
+	├── user_schools ── users ── roles ── permissions
+	├── academic_years ── classes ── students
+	├── parent_profiles ── parent_students ── students
+	├── vehicles ── trips ── vehicle_attendances
+	├── routes ── route_stops ── student_transport_assignments
+	├── trips ── trip_students ── students
+	└── school_attendances ── students
+```
+
+#### 3.5. Thứ tự tạo bảng tiếp theo
+
+Sau các bảng hiện tại, nên tạo theo thứ tự:
+
+1. `users` hoặc ASP.NET Core Identity tables.
+2. `user_profiles`.
+3. `user_schools`.
+4. `academic_years`.
+5. `classes`.
+6. `students`.
+7. `parent_profiles` và `parent_students`.
+8. `driver_profiles` và `vehicles`.
+9. `routes` và `route_stops`.
+10. `student_transport_assignments`.
+11. `trips` và `trip_students`.
+12. `vehicle_attendances`.
+13. `school_attendances`.
+14. `audit_logs` và `notifications`.
+
 Tạo các entity tối thiểu:
 
 - `User`, `ParentProfile`, `Student`, `ParentStudent`.

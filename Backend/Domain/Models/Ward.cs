@@ -27,6 +27,8 @@ public partial class Ward
 
     public virtual Province? ProvinceCodeNavigation { get; set; }
 
+    public virtual ICollection<RouteStop> RouteStops { get; set; } = new List<RouteStop>();
+
     public virtual ICollection<School> Schools { get; set; } = new List<School>();
 
     public virtual ICollection<UserProfile> UserProfiles { get; set; } = new List<UserProfile>();

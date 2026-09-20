@@ -34,4 +34,6 @@ public partial class AcademicYear
     public virtual ICollection<Class> Classes { get; set; } = new List<Class>();
 
     public virtual School School { get; set; } = null!;
+
+    public virtual ICollection<SchoolAttendance> SchoolAttendances { get; set; } = new List<SchoolAttendance>();
 }

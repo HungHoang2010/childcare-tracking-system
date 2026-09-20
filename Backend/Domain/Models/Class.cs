@@ -24,4 +24,6 @@ public partial class Class
     public DateTime? LastUpdate { get; set; }
 
     public virtual AcademicYear AcademicYear { get; set; } = null!;
+
+    public virtual ICollection<Student> Students { get; set; } = new List<Student>();
 }

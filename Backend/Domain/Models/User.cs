@@ -33,5 +33,21 @@ public partial class User
 
     public DateTime? LastUpdate { get; set; }
 
+    public virtual ICollection<DriverDocument> DriverDocuments { get; set; } = new List<DriverDocument>();
+
+    public virtual DriverProfile? DriverProfileUser { get; set; }
+
+    public virtual ICollection<DriverProfile> DriverProfileVerifiedByNavigations { get; set; } = new List<DriverProfile>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public virtual ParentProfile? ParentProfile { get; set; }
+
+    public virtual ICollection<SchoolAttendance> SchoolAttendances { get; set; } = new List<SchoolAttendance>();
+
     public virtual ICollection<UserSchool> UserSchools { get; set; } = new List<UserSchool>();
+
+    public virtual ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
+
+    public virtual ICollection<VehicleAttendance> VehicleAttendances { get; set; } = new List<VehicleAttendance>();
 }

@@ -55,9 +55,19 @@ public partial class School
 
     public virtual ICollection<AcademicYear> AcademicYears { get; set; } = new List<AcademicYear>();
 
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
     public virtual Province Province { get; set; } = null!;
 
+    public virtual ICollection<Route> Routes { get; set; } = new List<Route>();
+
+    public virtual ICollection<SchoolAttendance> SchoolAttendances { get; set; } = new List<SchoolAttendance>();
+
+    public virtual ICollection<Trip> Trips { get; set; } = new List<Trip>();
+
     public virtual ICollection<UserSchool> UserSchools { get; set; } = new List<UserSchool>();
+
+    public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 
     public virtual Ward Ward { get; set; } = null!;
 }

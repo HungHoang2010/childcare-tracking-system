@@ -9,4 +9,5 @@ public interface IRoleService
 {
     Task<BaseResponseDTO<List<Role>>> GetAllRoles();
     Task<BaseResponseDTO<Role>> AddRole(AddRoleRequest requests);
+    Task<BaseResponseDTO<Role>> UpdateRole(UpdateRoleRequest request, Guid roleId);
 }

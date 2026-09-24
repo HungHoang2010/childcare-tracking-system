@@ -33,5 +33,11 @@ namespace Backend.Controllers
             var response = await _roleService.AddRole(request);
             return StatusCode(response.Status, response);
         }
+        [HttpPut("{roleId}")]
+        public async Task<IActionResult> UpdateRole(Guid roleId, [FromBody] UpdateRoleRequest request)
+        {
+            var response = await _roleService.UpdateRole(request, roleId);
+            return StatusCode(response.Status, response);
+        }
     }
 }

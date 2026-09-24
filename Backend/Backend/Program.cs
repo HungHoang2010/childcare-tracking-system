@@ -25,6 +25,7 @@ builder.Services.AddDbContext<ChildcateDbContext>(options =>
     .EnableDetailedErrors());
 #endregion
 #region Services
+builder.Services.AddScoped(typeof(Infrastructure.Repository.IRepository<>), typeof(Infrastructure.Repository.Repository<>));
 builder.Services.AddScoped<IRoleService, RoleService>();
 #endregion  
 var app = builder.Build();

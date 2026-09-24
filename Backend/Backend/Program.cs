@@ -1,3 +1,5 @@
+using Application.IService;
+using Application.Service;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +24,9 @@ builder.Services.AddDbContext<ChildcateDbContext>(options =>
     .EnableSensitiveDataLogging()
     .EnableDetailedErrors());
 #endregion
+#region Services
+builder.Services.AddScoped<IRoleService, RoleService>();
+#endregion  
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

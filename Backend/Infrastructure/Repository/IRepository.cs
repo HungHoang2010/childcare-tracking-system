@@ -5,4 +5,5 @@ public interface IRepository<T> where T : class
 {
     Task<T?> GetTAsync(string query, object parameters);
     Task<List<T>> GetAllAsync(string query, object parameters);
+    Task<int> ExecuteAsync(string query, object parameters);
 }

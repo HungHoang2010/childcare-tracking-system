@@ -18,23 +18,32 @@ public class Repository<T> : IRepository<T> where T : class
     }
     public async Task<T?> GetTAsync(string query, object parameters)
     {
-        using var connection = GetConnection();
-        connection.Open();
-        return await connection.QuerySingleOrDefaultAsync<T>(query, parameters);;
+            using var connection = GetConnection();
+            await connection.OpenAsync();
+            return await connection.QuerySingleOrDefaultAsync<T>(query, parameters);
+
     }
 
     public async Task<List<T>> GetAllAsync(
     string query,
     object parameters)
 {
-    using var connection = GetConnection();
-    await connection.OpenAsync();
+        using var connection = GetConnection();
+        await connection.OpenAsync();
 
     var result = await connection.QueryAsync<T>(
         query,
         parameters);
-
     return new List<T>(result);
+
 }
+
+    public async Task<int> ExecuteAsync(string query, object parameters)
+    {
+            using var connection = GetConnection();
+            await connection.OpenAsync();
+            return await connection.ExecuteAsync(query, parameters);
+    }
+  
 }
     

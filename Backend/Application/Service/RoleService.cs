@@ -18,49 +18,33 @@ public class RoleService : IRoleService
         _roleRepository = roleRepository;
     }
 
-    public Task<BaseResponseDTO<Role>> AddRole(AddRoleRequest request)
+    public async Task<BaseResponseDTO<Role>> AddRole(AddRoleRequest request)
     {
         try
         {
-            string query = "INSERT INTO roles (RoleID, RoleName, RoleDescription) VALUES (@RoleID, @RoleName, @RoleDescription)";
-            using(var connection = new MySqlConnection(_connectionString))
+            string sp = "sp_Roles_InsertRoles";
+            var newRoleId = Guid.NewGuid();
+            var parameters = new
             {
-                connection.Open();
-                Guid newRoleId = Guid.NewGuid();
-                using(var command = new MySqlCommand(query, connection))
+                pRoleID = newRoleId,
+                pRoleName = request.RoleName,
+                pRoleDescription = request.RoleDescription
+            };
+            await _roleRepository.ExecuteAsync(sp, parameters);
+            return await Task.FromResult(new BaseResponseDTO<Role>
+            {
+                Status = 201,
+                Message = "Role added successfully.",
+                Data = new Role
                 {
-                    command.Parameters.AddWithValue("@RoleID", newRoleId);
-                    command.Parameters.AddWithValue("@RoleName", request.RoleName);
-                    command.Parameters.AddWithValue("@RoleDescription", request.RoleDescription);
-                    int rowsAffected = command.ExecuteNonQuery();
-                    if(rowsAffected > 0)
-                    {
-                        return Task.FromResult(new BaseResponseDTO<Role>
-                        {
-                            Status = 201,
-                            Message = "Role added successfully.",
-                            Data = new Role
-                            {
-                                RoleId = newRoleId,
-                                RoleName = request.RoleName,
-                                RoleDescription = request.RoleDescription
-                            }
-                        });
-                    }
-                    else
-                    {
-                        return Task.FromResult(new BaseResponseDTO<Role>
-                        {
-                            Status = 400,
-                            Message = "Failed to add role.",
-                            Data = null
-                        });
-                    }
+                    RoleId = newRoleId,
+                    RoleName = request.RoleName,
+                    RoleDescription = request.RoleDescription
                 }
-            }
+            });
         }catch (Exception ex)
         {
-            return Task.FromResult(new BaseResponseDTO<Role>
+            return await Task.FromResult(new BaseResponseDTO<Role>
             {
                 Status = 500,
                 Message = $"An error occurred while adding the role: {ex.Message}",
@@ -96,41 +80,25 @@ public class RoleService : IRoleService
     public async Task<BaseResponseDTO<Role>> UpdateRole(UpdateRoleRequest request, Guid roleId)
     {
         try{
-            string query = "UPDATE roles SET RoleName = @RoleName, RoleDescription = @RoleDescription WHERE RoleID = @RoleID";
-            using(var connection = new MySqlConnection(_connectionString))
+           string sp = "sp_Roles_UpdateRoleNameAndRoleDescriptions";
+            var parameters = new
             {
-                connection.Open();
-                using(var command = new MySqlCommand(query, connection))
+                pRoleID = roleId,
+                pRoleName = request.RoleName,
+                pRoleDescription = request.RoleDescription
+            };
+            await _roleRepository.ExecuteAsync(sp, parameters);
+            return await Task.FromResult(new BaseResponseDTO<Role>
+            {
+                Status = 200,
+                Message = "Role updated successfully.",
+                Data = new Role
                 {
-                    command.Parameters.AddWithValue("@RoleID", roleId);
-                    command.Parameters.AddWithValue("@RoleName", request.RoleName);
-                    command.Parameters.AddWithValue("@RoleDescription", request.RoleDescription);
-                    int rowsAffected = command.ExecuteNonQuery();
-                    if(rowsAffected > 0)
-                    {
-                        return new BaseResponseDTO<Role>
-                        {
-                            Status = 200,
-                            Message = "Role updated successfully.",
-                            Data = new Role
-                            {
-                                RoleId = roleId,
-                                RoleName = request.RoleName,
-                                RoleDescription = request.RoleDescription
-                            }
-                        };
-                    }
-                    else
-                    {
-                        return new BaseResponseDTO<Role>
-                        {
-                            Status = 404,
-                            Message = "Role not found.",
-                            Data = null
-                        };
-                    }
+                    RoleId = roleId,
+                    RoleName = request.RoleName,
+                    RoleDescription = request.RoleDescription
                 }
-            }
+            });
 
         }catch (Exception ex)
         {

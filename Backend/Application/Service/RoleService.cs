@@ -57,9 +57,18 @@ public class RoleService : IRoleService
     {
         try
         {
-            string query = "SELECT * FROM roles";
+            string query = "sp_Roles_GetAllRoles";
             var result = await _roleRepository.GetAllAsync(query, new { });
             var roles = new List<Role>(result);
+            if (roles.Count == 0)
+            {
+                return new BaseResponseDTO<List<Role>>
+                {
+                    Status = 404,
+                    Message = "No roles found.",
+                    Data = null
+                };
+            }
             return new BaseResponseDTO<List<Role>>
             {
                 Status = 200,

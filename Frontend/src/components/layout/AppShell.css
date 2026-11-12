@@ -1,0 +1,166 @@
+:root {
+  /* Kích thước khung (App Shell) */
+  --header-height: 64px;
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 80px;
+
+  /* Hệ thống khoảng cách (Spacing scale) */
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  font-family: "Inter", sans-serif;
+}
+
+/* Reset cơ bản để khóa kích thước */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Chặn cuộn toàn trang */
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+/* Khung Dashboard */
+.app-shell {
+  display: grid;
+  height: 100vh;
+  width: 100%;
+  /* Chia cột và hàng dựa trên biến đã khai báo */
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--header-height) 1fr;
+
+  grid-template-areas:
+    "sidebar header"
+    "sidebar main";
+}
+.app-shell__sidebar {
+  grid-area: sidebar;
+  background-color: Black;
+  color: white;
+  overflow-y: auto; /* Cho phép cuộn nếu menu quá dài */
+  margin: var(--space-md);
+  border-radius: 8px;
+}
+.app-shell__sidebar-header {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  padding: var(--space-md);
+  gap: var(--space-sm);
+}
+.app-shell__sidebar-header__logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+.app-shell__sidebar-header__logo-image {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+.app-shell__sidebar-header__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+}
+.app-shell__sidebar-header__name-link {
+  text-decoration: none;
+  color: white;
+}
+.app-shell__sidebar-main__menu {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--space-md);
+}
+.app-shell__sidebar-main__menu__element {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0 8px;
+  border-radius: 4px;
+}
+.app-shell__sidebar-main__menu__element-link {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 12px;
+  color: white;
+  text-decoration: none;
+}
+.app-shell__sidebar-main__menu__element-icon {
+  width: var(--space-md);
+  height: var(--space-md);
+  flex: 0 0 var(--space-md);
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+.app-shell__sidebar-main__menu__element-name {
+  font-size: 14px;
+  color: white;
+  font-weight: 700;
+}
+.app-shell__sidebar-main__menu__element-link:hover {
+  background-color: white;
+}
+.app-shell__sidebar-main__menu__element-link {
+  border-radius: 4px;
+}
+.app-shell__sidebar-main__menu__element-link:hover
+  .app-shell__sidebar-main__menu__element-name {
+  color: Black;
+}
+.app-shell__sidebar-main__menu__element-link:hover
+  .app-shell__sidebar-main__menu__element-icon {
+  filter: brightness(0);
+}
+.app-shell__header {
+  grid-area: header;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  z-index: 10;
+}
+
+.app-shell__main-content {
+  grid-area: main;
+  background-color: #f3f4f6;
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+@media (max-width: 768px) {
+  .app-shell {
+    /* Thu hẹp Sidebar thành dạng icon (80px) */
+    grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    /* Đẩy Sidebar xuống dưới cùng như thanh điều hướng (Bottom Nav) */
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--header-height) 1fr 60px;
+    grid-template-areas:
+      "header"
+      "main"
+      "sidebar";
+  }
+
+  .app-shell__sidebar {
+    overflow-y: hidden;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .app-shell__sidebar-header {
+    display: none;
+  }
+}

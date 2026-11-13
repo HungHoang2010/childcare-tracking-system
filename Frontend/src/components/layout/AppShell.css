@@ -1,7 +1,7 @@
 :root {
   /* Kích thước khung (App Shell) */
   --header-height: 64px;
-  --sidebar-width: 260px;
+  --sidebar-width: 240px;
   --sidebar-collapsed-width: 80px;
 
   /* Hệ thống khoảng cách (Spacing scale) */
@@ -43,10 +43,10 @@ body {
 .app-shell__sidebar {
   grid-area: sidebar;
   background-color: Black;
-  color: white;
+  color: #f5f4f9;
   overflow-y: auto; /* Cho phép cuộn nếu menu quá dài */
-  margin: var(--space-md);
-  border-radius: 8px;
+  margin: var(--space-sm);
+  border-radius: var(--space-md);
 }
 .app-shell__sidebar-header {
   display: flex;
@@ -123,14 +123,66 @@ body {
 }
 .app-shell__header {
   grid-area: header;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: White;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-sm);
 }
-
+.app-shell__header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.app-shell__header-left__panelLeftClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid white;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0;
+  color: #111827;
+  width: 30px;
+  height: 30px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+.app-shell__header-left__panelLeftClose:hover {
+  border: 1px solid transparent;
+}
+.app-shell__header-left__panelLeftClose:active {
+  background-color: #e5e7eb;
+  border-color: #e5e7eb;
+}
+.app-shell__header-left__searchBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px;
+  border-radius: 20px;
+  padding: 8px 6px;
+  background-color: #ebeaef;
+}
+.app-shell__header-left__searchBar-icon {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #8e8d93;
+}
+.app-shell__header-left__searchBar-input {
+  border: none;
+  outline: none;
+  background: none;
+  color: #8e8d93;
+  width: 200px;
+}
+.app-shell__header-right {
+}
 .app-shell__main-content {
   grid-area: main;
-  background-color: #f3f4f6;
+  background-color: white;
   padding: var(--space-lg);
   overflow-y: auto;
 }

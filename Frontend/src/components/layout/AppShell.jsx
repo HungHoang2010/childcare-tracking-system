@@ -5,6 +5,9 @@ import Dashboard from "../../assets/dashboard_icon/home-2.png";
 import Teachers from "../../assets/dashboard_icon/teacher.png";
 import Logo from "../../assets/Logo/Logo.webp";
 import Notification from "../../assets/dashboard_icon/notification.png";
+import Chats from "../../assets/dashboard_icon/chats.png";
+import Settings from "../../assets/dashboard_icon/settings.png";
+import { useState, useEffect, useCallback, useRef } from "react";
 function AppShell({ children }) {
   const menuItems = [
     { name: "Dashboard", icon: Dashboard, path: "/dashboard" },
@@ -21,9 +24,25 @@ function AppShell({ children }) {
   };
   const headerNotificationIcon = {
     name: "Notifications",
-    icon: <i class="fa-regular fa-bell"></i>,
-    path: "/notifications",
+    icon: Notification,
+    path: "/notification",
   };
+  const headerChatsIcon = {
+    name: "Chats",
+    icon: Chats,
+    path: "/chats",
+  };
+  const headerSettingsIcon = {
+    name: "Settings",
+    icon: Settings,
+    path: "/settings",
+  };
+  const dropdownRef = useRef(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const toggleDropdown = () => {
+    setDropdownOpen((prev) => !prev);
+  };
+
   return (
     <div className="app-shell">
       <aside className="app-shell__sidebar">
@@ -100,20 +119,55 @@ function AppShell({ children }) {
 
         <div className="app-shell__header-right">
           <div className="app-shell__header-right__options">
-            <div className="app-shell__header-right__options__notification">
-              <button
-                type="button"
-                aria-label={headerNotificationIcon.name}
-                className="app-shell__header-right__options__notification-button"
-              >
-                {headerNotificationIcon.path ? (
-                  <Link to={headerNotificationIcon.path}>
-                    {headerNotificationIcon.icon}
-                  </Link>
-                ) : (
-                  headerNotificationIcon.icon
-                )}
-              </button>
+            <Link
+              to={headerNotificationIcon.path}
+              aria-label={headerNotificationIcon.name}
+              className="app-shell__header-right__options__notification-button"
+            >
+              <img
+                src={headerNotificationIcon.icon}
+                className="app-shell__header-right__options__notification-icon"
+                alt={headerNotificationIcon.name}
+              />
+            </Link>
+            <Link
+              to={headerChatsIcon.path}
+              aria-label={headerChatsIcon.name}
+              className="app-shell__header-right__options__chats-button"
+            >
+              <img
+                src={headerChatsIcon.icon}
+                className="app-shell__header-right__options__chats-icon"
+                alt={headerChatsIcon.name}
+              />
+            </Link>
+            <Link
+              to={headerSettingsIcon.path}
+              aria-label={headerSettingsIcon.name}
+              className="app-shell__header-right__options__settings-button"
+            >
+              <img
+                src={headerSettingsIcon.icon}
+                className="app-shell__header-right__options__settings-icon"
+                alt={headerSettingsIcon.name}
+              />
+            </Link>
+            <div className="app-shell__header-right__options__profile">
+              <img
+                src="https://via.placeholder.com/40"
+                alt="User Profile"
+                className="app-shell__header-right__options__profile-image"
+                onClick={toggleDropdown}
+                ref={dropdownRef}
+              />
+              {dropdownOpen && (
+                <div className="app-shell__header-right__options__profile-image__dropdown">
+                  <p>Xin chào, User!</p>
+                  <Link to="/profile">Hồ sơ</Link>
+                  <Link to="/settings">Cài đặt</Link>
+                  <Link to="/logout">Đăng xuất</Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
